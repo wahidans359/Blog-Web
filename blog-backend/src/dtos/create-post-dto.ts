@@ -6,7 +6,4 @@ export class CreatePostDto {
 
   @IsNotEmpty({ message: 'Content should not be empty' })
   content: string;
-
-  @IsNotEmpty({ message: 'Author ID should not be empty' })
-  authorId: string;
 }

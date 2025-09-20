@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   Body,
   Controller,
@@ -6,7 +7,10 @@ import {
   Param,
   Patch,
   Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { CreateCommentDto } from 'src/dtos/create-comment-dto';
 import { UpdateCommentDto } from 'src/dtos/update-comment-dto';
 import { ValidateObjectIdPipe } from 'src/pipes/validate-object-id.pipe';
@@ -31,16 +35,26 @@ export class CommentController {
   getCommentById(@Param('id', ValidateObjectIdPipe) id: string) {
     return this.commentService.getCommentById(id);
   }
+  @UseGuards(AuthGuard('jwt'))
   @Post()
-  createComment(@Body() createCommentDto: CreateCommentDto) {
-    return this.commentService.createComment(createCommentDto);
+  createComment(@Body() createCommentDto: CreateCommentDto, @Req() req) {
+    return this.commentService.createComment(
+      createCommentDto,
+      req.user.id as string,
+    );
   }
+  @UseGuards(AuthGuard('jwt'))
   @Patch(':id')
   updateComment(
     @Param('id', ValidateObjectIdPipe) id: string,
     @Body() updateCommentDto: UpdateCommentDto,
+    @Req() req,
   ) {
-    return this.commentService.updateComment(id, updateCommentDto);
+    return this.commentService.updateComment(
+      id,
+      updateCommentDto,
+      req.user.id as string,
+    );
   }
   @Delete('/clean')
   deleteAllComments() {

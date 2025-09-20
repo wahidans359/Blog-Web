@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -29,23 +28,7 @@ export class UserController {
 
   @Get('/me')
   getMe(@Req() req: Request) {
-    const authHeader = req.headers.authorization as string;
-    if (!authHeader) {
-      throw new BadRequestException('Authorization header is missing');
-    }
-    try {
-      const token = authHeader.split(' ')[1];
-      interface JwtPayload {
-        sub: string;
-        email: string;
-      }
-      const payload = this.jwtService.verify<JwtPayload>(token, {
-        secret: process.env.JWT_ACCESS_SECRET || 'jwtAccessSecret',
-      });
-      return this.userService.getUserById(payload.sub);
-    } catch (err) {
-      throw new Error(err as string);
-    }
+    return this.userService.getCurrentUser(req);
   }
   @Post()
   createUser(@Body() createUserDto: CreateUserDto) {

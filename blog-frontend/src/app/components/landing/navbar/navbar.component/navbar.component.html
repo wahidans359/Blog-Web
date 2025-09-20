@@ -1,0 +1,36 @@
+<!-- navbar.component.html -->
+<nav class="navbar">
+  <!-- Left: Logo -->
+  <div class="navbar-left">
+    <a routerLink="/" class="logo">BlogApp</a>
+  </div>
+
+  <!-- Center: Navigation Links -->
+  <ul class="navbar-center">
+    @for (link of navLinks; track link.path) {
+      <li>
+        <a [routerLink]="link.path">{{ link.label }}</a>
+      </li>
+    } @empty {
+      <li>No links available</li>
+    }
+  </ul>
+
+  <!-- Right: Auth Buttons -->
+  <div class="navbar-right">
+    @if(authState$ | async; as authState) {
+      @if(authState.isAuthenticated) {
+        <span class="user-name">Welcome, {{ authState.user?.name }}</span>
+        <button (click)="logout()" class="logout-btn">Logout</button>
+      }
+      @else{
+          @for (link of authLinks; track link.path) {
+            <a [routerLink]="link.path" class="auth-btn">{{ link.label }}</a>
+          } @empty {
+            <span>No auth links</span>
+          }
+      }
+    } 
+    
+  </div>
+</nav>

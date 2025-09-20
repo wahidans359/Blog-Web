@@ -5,7 +5,4 @@ export class CreateCommentDto {
 
   @IsNotEmpty({ message: 'Post ID should not be empty' })
   postId: string;
-
-  @IsNotEmpty({ message: 'User ID should not be empty' })
-  userId: string;
 }

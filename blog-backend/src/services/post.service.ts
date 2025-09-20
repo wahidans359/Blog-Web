@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ObjectId } from 'mongodb';
 import { CreatePostDto } from 'src/dtos/create-post-dto';
@@ -27,8 +28,8 @@ export class PostService {
     return posts;
   }
 
-  async createPost(createPostDto: CreatePostDto) {
-    const authorId = createPostDto.authorId;
+  async createPost(createPostDto: CreatePostDto, userId: string) {
+    const authorId = userId;
     if (!authorId) {
       throw new BadRequestException('Author ID is required');
     }
@@ -41,7 +42,8 @@ export class PostService {
     if (!author) {
       throw new NotFoundException('Author not found');
     }
-    const post = this.postRepo.create(createPostDto);
+    const data = { ...createPostDto, authorId };
+    const post = this.postRepo.create(data);
     const savedPost = await this.postRepo.save(post);
     if (!savedPost) {
       throw new InternalServerErrorException('Post creation failed');
@@ -68,24 +70,33 @@ export class PostService {
     }
     return await this.postRepo.findById(id);
   }
-  async updatePost(id: string, updatePostDto: UpdatePostDto) {
+  async updatePost(id: string, updatePostDto: UpdatePostDto, authorId: string) {
     const post = await this.postRepo.findById(id);
     if (!post) {
       throw new NotFoundException('Post not found');
+    }
+    if (post.authorId.toString() !== authorId) {
+      throw new UnauthorizedException(
+        'You are not authorized to update this post',
+      );
     }
     Object.assign(post, updatePostDto);
     const updatedPost = await this.postRepo.save(post);
     if (!updatedPost) {
       throw new InternalServerErrorException('Post update failed');
     }
-    return { message: 'Post updated successfully', updatedPost };
+    return { message: 'Post updated successfully', post };
   }
-  async removePostById(id: string) {
+  async removePostById(id: string, authorId: string) {
     const post = await this.postRepo.findById(id);
     if (!post) {
       throw new NotFoundException('Post not found');
     }
-
+    if (post.authorId.toString() !== authorId) {
+      throw new UnauthorizedException(
+        'You are unauthorized to delete this post.',
+      );
+    }
     // Delete the post
     await this.postRepo.delete({ _id: new ObjectId(id) });
     const deletedPost = post;

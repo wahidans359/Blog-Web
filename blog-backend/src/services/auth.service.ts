@@ -13,6 +13,7 @@ import { ConfigService } from '@nestjs/config';
 import { UserRepository } from 'src/repositories/user.repository';
 import { User } from 'src/entities/user.entity';
 import { CreateUserDto } from 'src/dtos/create-user-dto';
+import { RefreshTokenDto } from 'src/dtos/refresh-token-dto';
 
 @Injectable()
 export class AuthService {
@@ -41,7 +42,7 @@ export class AuthService {
     return result as Partial<any>;
   }
 
-  async login(user: User) {
+  async login(user: Partial<User>) {
     // user is validated (e.g. from local strategy or manual validation)
     try {
       const payload = {
@@ -70,7 +71,10 @@ export class AuthService {
       const hashed = await bcrypt.hash(refreshToken, 10);
       await this.usersService.saveRefreshToken(String(user._id), hashed);
 
-      return { accessToken, refreshToken };
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unused-vars
+      const { currentHashedRefreshToken, ...userData } = user as any;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      return { accessToken, refreshToken, userData };
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       throw new UnauthorizedException({
@@ -79,13 +83,13 @@ export class AuthService {
     }
   }
 
-  async refreshTokens(userId: string, refreshToken: string) {
-    const user = await this.userRepository.findById(userId);
+  async refreshTokens(refreshTokenDto: RefreshTokenDto) {
+    const user = await this.userRepository.findById(refreshTokenDto.userId);
     if (!user || !user.currentHashedRefreshToken) {
       throw new UnauthorizedException('No refresh token found');
     }
     const matches = await bcrypt.compare(
-      refreshToken,
+      refreshTokenDto.refreshToken,
       user.currentHashedRefreshToken,
     );
     if (!matches) {
@@ -101,6 +105,20 @@ export class AuthService {
   }
 
   async logout(userId: string) {
-    return await this.usersService.removeRefreshToken(userId);
+    try {
+      if (!userId) {
+        throw new UnauthorizedException('User ID is required for logout');
+      }
+
+      const user = await this.userRepository.findById(userId);
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+      await this.usersService.removeRefreshToken(userId);
+      return { success: true, message: 'Logout successful' };
+    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      throw new InternalServerErrorException(error?.message || 'Logout failed');
+    }
   }
 }

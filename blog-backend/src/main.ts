@@ -10,6 +10,15 @@ async function bootstrap() {
       transform: true, // auto-transform payloads to DTO classes
     }),
   );
+  app.enableCors({
+    origin: 'http://localhost:4200', // Adjust this to your frontend's URL
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Authorization'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+  });
   await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap();
+void bootstrap();

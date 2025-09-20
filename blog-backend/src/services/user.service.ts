@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
+  BadRequestException,
   ConflictException,
   forwardRef,
   Inject,
@@ -17,6 +20,7 @@ import { UpdateUserDto } from 'src/dtos/update-user-dto';
 import { PostRepository } from 'src/repositories/post.repository';
 import { CommentRepository } from 'src/repositories/comment.repository';
 import { AuthService } from './auth.service';
+import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class UserService {
   // User service methods would go here
@@ -26,6 +30,7 @@ export class UserService {
     private readonly userRepo: UserRepository,
     private readonly postRepo: PostRepository,
     private readonly commentRepo: CommentRepository,
+    private readonly jwtService: JwtService,
   ) {}
   async createUser(createUserDto: CreateUserDto) {
     // Logic to create a user
@@ -53,9 +58,12 @@ export class UserService {
     if (!savedUser) {
       throw new InternalServerErrorException('User saving failed');
     }
+    const { password, currentHashedRefreshToken, ...result } = savedUser as any;
+    // const { password,  } = savedUser;
     // const { password, ...result } = savedUser as any;
     // return result as Partial<User>;
-    return savedUser;
+    // return createdData;
+    return result as Partial<User>;
   }
   async getAllUsers() {
     // Logic to get all users
@@ -157,5 +165,32 @@ export class UserService {
     }
     user.currentHashedRefreshToken = '';
     await this.userRepo.save(user);
+  }
+  async getCurrentUser(req: any) {
+    const authHeader = req.headers.authorization as string;
+    if (!authHeader) {
+      throw new BadRequestException('Authorization header is missing');
+    }
+    try {
+      const token = authHeader.split(' ')[1];
+      interface JwtPayload {
+        sub: string;
+        email: string;
+      }
+      const payload = this.jwtService.verify<JwtPayload>(token, {
+        secret: process.env.JWT_ACCESS_SECRET || 'jwtAccessSecret',
+      });
+      const { currentHashedRefreshToken, ...currentUserData } =
+        await this.getUserById(payload.sub);
+      return {
+        message: 'Authorization Successful',
+        data: currentUserData,
+      };
+    } catch (err) {
+      if (err.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Token has expired');
+      }
+      throw new UnauthorizedException('Invalid token');
+    }
   }
 }

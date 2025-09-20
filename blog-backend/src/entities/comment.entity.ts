@@ -1,5 +1,11 @@
 import { ObjectId } from 'mongodb';
-import { Column, CreateDateColumn, Entity, ObjectIdColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ObjectIdColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class Comment {
@@ -17,4 +23,7 @@ export class Comment {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

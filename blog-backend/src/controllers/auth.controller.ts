@@ -4,6 +4,7 @@ import { AuthService } from 'src/services/auth.service';
 import { User } from 'src/entities/user.entity';
 import { CreateUserDto } from 'src/dtos/create-user-dto';
 import { LoginDto } from 'src/dtos/login-dto';
+import { RefreshTokenDto } from 'src/dtos/refresh-token-dto';
 
 @Controller('auth')
 export class AuthController {
@@ -26,7 +27,11 @@ export class AuthController {
     return this.authService.signup(createUserDto);
   }
   @Post('refresh')
-  async refresh(@Body() body: { userId: string; refreshToken: string }) {
-    return await this.authService.refreshTokens(body.userId, body.refreshToken);
+  async refresh(@Body() refreshTokenDto: RefreshTokenDto) {
+    return await this.authService.refreshTokens(refreshTokenDto);
+  }
+  @Post('logout')
+  async logout(@Body('userId') userID: string) {
+    return await this.authService.logout(userID);
   }
 }
