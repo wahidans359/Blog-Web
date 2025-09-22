@@ -1,23 +1,27 @@
 import { Component , OnInit} from '@angular/core';
 import { RouterLink } from '@angular/router';
-
+// import {} from '@angular/animations'
 @Component({
   selector: 'app-middle',
   imports: [RouterLink],
   templateUrl: './middle.component.html',
-  styleUrl: './middle.component.scss'
+  styleUrl: './middle.component.scss',
 })
 export class MiddleComponent implements OnInit {
   headline = 'Welcome to Our Blog Platform';
   subheadline = 'Discover, Share, and Connect with Amazing Stories';
   ctaText = 'Get Started';
   ctaLink = '/signup';
+  isVisible = true;
 
   currentHeadline = '';
   private headlineIndex = 0;
   private charIndex = 0;
 
   ngOnInit(): void {
+    setTimeout(() => {
+      this.isVisible = true;
+    }, 100);
     this.animateHeadline();
   }
   animateHeadline(): void {

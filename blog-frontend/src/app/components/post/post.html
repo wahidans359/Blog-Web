@@ -1,0 +1,56 @@
+<app-navbar/>
+<div class="posts-container">
+  <div class="posts-header">
+    <div class="header-content">
+      <div>
+        <h1>Latest Posts</h1>
+        <p>Explore our collection of articles</p>
+      </div>
+      
+      @if (authState$ | async; as authState) {
+        @if (authState.isAuthenticated) {
+          <button class="create-post-btn" routerLink="/posts/create">
+            <i class="fas fa-plus"></i>
+            Create Post
+          </button>
+        }
+      }
+    </div>
+  </div>
+
+  @if (error) {
+    <div class="error-message">
+      {{ error }}
+    </div>
+  }
+
+  <div class="posts-grid">
+    @for (post of displayedPosts; track post._id) {
+      <article class="post-card">
+        <div class="post-content">
+          <div class="post-meta">
+            <span class="post-date">{{ post.createdAt | date:'mediumDate' }}</span>
+            <span class="author-name">By {{ post.authorName }}</span>
+          </div>
+          <h2 class="post-title">{{ post.title }}</h2>
+          <p class="post-excerpt">{{ post.content | slice:0:20 }}{{post.content.length > 20 ? '...' : ''}}</p>
+          <div class="post-footer">
+            <span class="comments-count">
+              {{ post.commentIds.length || 0 }} Comments
+            </span>
+            <a [routerLink]="['/posts', post._id]" class="read-more">
+              Read More <i class="fas fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </article>
+    }
+  </div>
+
+  @if (loading) {
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <span>Loading posts...</span>
+    </div>
+  }
+</div>

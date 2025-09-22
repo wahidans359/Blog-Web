@@ -1,36 +1,66 @@
-<!-- navbar.component.html -->
 <nav class="navbar">
-  <!-- Left: Logo -->
-  <div class="navbar-left">
-    <a routerLink="/" class="logo">BlogApp</a>
-  </div>
+  <div class="navbar-container">
+    <!-- Logo Section -->
+    <div class="navbar-brand">
+      <a routerLink="/" class="logo">
+        <i class="fas fa-blog"></i>
+        <span>BlogApp</span>
+      </a>
+    </div>
 
-  <!-- Center: Navigation Links -->
-  <ul class="navbar-center">
-    @for (link of navLinks; track link.path) {
-      <li>
-        <a [routerLink]="link.path">{{ link.label }}</a>
-      </li>
-    } @empty {
-      <li>No links available</li>
-    }
-  </ul>
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-toggle" (click)="toggleMenu()">
+      <i [class]="isMenuOpen ? 'fas fa-times' : 'fas fa-bars'"></i>
+    </button>
 
-  <!-- Right: Auth Buttons -->
-  <div class="navbar-right">
-    @if(authState$ | async; as authState) {
-      @if(authState.isAuthenticated) {
-        <span class="user-name">Welcome, {{ authState.user?.name }}</span>
-        <button (click)="logout()" class="logout-btn">Logout</button>
-      }
-      @else{
-          @for (link of authLinks; track link.path) {
-            <a [routerLink]="link.path" class="auth-btn">{{ link.label }}</a>
-          } @empty {
-            <span>No auth links</span>
+    <!-- Navigation Section -->
+    <div class="navbar-content" [class.active]="isMenuOpen">
+      <!-- Nav Links -->
+      <ul class="nav-links">
+        @for (link of navLinks; track link.path) {
+          <li>
+            <a [routerLink]="link.path" 
+               routerLinkActive="active"
+               [routerLinkActiveOptions]="{ exact: true }">
+              {{ link.label }}
+            </a>
+          </li>
+        }
+      </ul>
+
+      <!-- Auth Section -->
+      <div class="auth-section">
+        @if (authState$ | async; as authState) {
+          @if (authState.isAuthenticated) {
+            <div class="user-menu">
+              <!-- Create Post Button -->
+              <a routerLink="/posts/create" class="create-post-btn">
+                <i class="fas fa-plus"></i>
+                <span>Create Post</span>
+              </a>
+              
+              <span class="user-name">
+                <i class="fas fa-user"></i>
+                {{ authState.user?.name }}
+              </span>
+              <button (click)="logout()" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+              </button>
+            </div>
+          } @else {
+            <div class="auth-buttons">
+              @for (link of authLinks; track link.path) {
+                <a [routerLink]="link.path" 
+                   class="auth-btn"
+                   [class.primary]="link.path === '/signup'">
+                  {{ link.label }}
+                </a>
+              }
+            </div>
           }
-      }
-    } 
-    
+        }
+      </div>
+    </div>
   </div>
 </nav>

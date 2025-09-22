@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AuthResponse } from '../interfaces/auth-response';
+import { User } from '../interfaces/user';
+import { jwtDecode } from 'jwt-decode';
 
 @Injectable({
   providedIn: 'root'
@@ -34,5 +36,23 @@ export class TokenService {
   clearTokens() : void {
     localStorage.removeItem(this.ACCESS_TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+  }
+  getUserData() : User | undefined {
+    const token = this.getAccessToken();
+    if(!token) return undefined;
+
+    try {
+      const decodedToken: any = jwtDecode(token);
+      console.log('Decoded token is : ',decodedToken);
+      return {
+        _id:decodedToken.userId,
+        name:decodedToken.name,
+        email:decodedToken.email
+      }
+    }
+    catch (error) {
+      console.error('Error decoding token: ',error);
+      return undefined;
+    }
   }
 }

@@ -4,16 +4,29 @@ import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { NavbarComponent } from '../landing/navbar/navbar.component/navbar.component';
 import { AuthService } from '../../services/auth-service';
 import { SignupCredentials } from '../../interfaces/signup-crendentials';
-
+import {ToastrService} from 'ngx-toastr';
+import { trigger, transition, style, animate } from '@angular/animations';
 @Component({
   selector: 'app-auth',
   templateUrl: './auth.html',
   styleUrls: ['./auth.scss'],
-  imports: [FormsModule, RouterModule, NavbarComponent]
+  imports: [FormsModule, RouterModule, NavbarComponent],
+  animations: [
+    trigger('flyInOut', [
+      transition(':enter', [
+        style({ transform: 'translateY(-20px)', opacity: 0 }),
+        animate('300ms ease-out', style({ transform: 'translateY(0)', opacity: 1 }))
+      ]),
+      transition(':leave', [
+        animate('300ms ease-in', style({ transform: 'translateY(-20px)', opacity: 0 }))
+      ])
+    ])
+  ]
 })
 export class Auth implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private toastr = inject(ToastrService)
   constructor(
     private route: ActivatedRoute
   ) {}
@@ -62,12 +75,13 @@ export class Auth implements OnInit {
     this.authService.login(this.loginForm).subscribe({
       next: (response) => {
         this.isLoading = false;
-        this.router.navigate(['/']);
+        this.toastr.success('Login successful', 'Welcome back!');
+        this.router.navigate(['/posts']);
       },
       error: (error) => {
         this.isLoading = false;
         this.errorMessage = error?.error?.message || 'An error occurred during login.';
-        console.error('Login error:', error);
+        this.toastr.error(this.errorMessage, 'Error');
       },
       complete: () => {
         this.isLoading = false;
@@ -86,17 +100,17 @@ export class Auth implements OnInit {
       this.isLoading = false;
       return;
     }
-    console.log('Signup form submitted', this.signupForm);
     const {confirmPassword, ...signupData} = this.signupForm;
     this.authService.signup(signupData as SignupCredentials ).subscribe({
       next : (response) => {
         this.isLoading = false;
-        this.router.navigate(['/']);
+        this.toastr.success('Account created successfully', 'Welcome!');
+        this.router.navigate(['/posts']);
       },
       error : (error) => {
         this.isLoading = false;
         this.errorMessage = error?.error?.message || 'An error occurred during signup.';
-        console.error('Signup error:', error);
+        this.toastr.error(this.errorMessage, 'Signup Failed');
       },
       complete : () => {
         this.isLoading = false;

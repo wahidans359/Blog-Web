@@ -1,0 +1,73 @@
+<app-navbar/>
+<div class="post-detail-container">
+  @if (loading) {
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <span>Loading post...</span>
+    </div>
+  } @else if (error) {
+    <div class="error-message">{{ error }}</div>
+  } @else if (post) {
+    <article class="post-detail">
+      @if (isEditing) {
+        <form (ngSubmit)="onSubmit()" #editForm="ngForm">
+          <div class="form-group">
+            <input 
+              type="text" 
+              [(ngModel)]="editedPost.title" 
+              name="title" 
+              required 
+              class="edit-title"
+              placeholder="Post title"
+            >
+          </div>
+          <div class="form-group">
+            <textarea 
+              [(ngModel)]="editedPost.content" 
+              name="content" 
+              required 
+              class="edit-content"
+              rows="10"
+              placeholder="Write your post content here..."
+            ></textarea>
+          </div>
+          <div class="edit-actions">
+            <button type="submit" class="save-btn" [disabled]="!editForm.valid">
+              <i class="fas fa-save"></i> Save Changes
+            </button>
+            <button type="button" class="cancel-btn" (click)="cancelEdit()">
+              <i class="fas fa-times"></i> Cancel
+            </button>
+          </div>
+        </form>
+      } @else {
+        <header class="post-header">
+          <h1>{{ post.title }}</h1>
+          <div class="post-meta">
+            <span class="post-date">
+              <i class="far fa-calendar-alt"></i> 
+              {{ post.createdAt | date:'medium' }}
+            </span>
+            <span class="author">
+              <i class="far fa-user"></i> 
+              {{ post.authorName }}
+            </span>
+          </div>
+          @if (canEdit) {
+            <div class="post-actions">
+              <button class="edit-btn" (click)="startEdit()">
+                <i class="fas fa-edit"></i> Edit Post
+              </button>
+              <button class="delete-btn" (click)="confirmDelete()">
+                <i class="fas fa-trash-alt"></i> Delete Post
+              </button>
+            </div>
+          }
+        </header>
+        <div class="post-content">
+          {{ post.content }}
+        </div>
+      }
+    </article>
+  }
+</div>

@@ -1,56 +1,223 @@
 .navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
   display: flex;
-  justify-content: space-between; /* logo left, center links, auth right */
   align-items: center;
-  padding: 1rem 5rem;
-  background: #fff;
-  border-bottom: 1px solid #ddd;
-  font-family: 'Poppins', sans-serif;
+  justify-content: space-between;
 }
 
-/* Left */
-.navbar-left .logo {
-  font-size: 1.5rem;
-  font-weight: bold;
-  text-decoration: none;
-  color: #222;
+.navbar-brand {
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+
+    i {
+      color: #3b82f6;
+    }
+  }
 }
 
-/* Center: navLinks */
-.navbar-center {
+.navbar-content {
   display: flex;
+  align-items: center;
   gap: 2rem;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
   list-style: none;
   margin: 0;
   padding: 0;
+
+  a {
+    color: #64748b;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+
+    &:hover {
+      color: #3b82f6;
+      background: #eff6ff;
+    }
+
+    &.active {
+      color: #3b82f6;
+      background: #eff6ff;
+    }
+  }
 }
 
-.navbar-center a {
-  text-decoration: none;
-  color: #444;
-  font-weight: 500;
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  .create-post-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #3b82f6;
+    color: white;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+
+    &:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+    }
+
+    i {
+      font-size: 0.875rem;
+    }
+  }
+
+  .user-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #1e293b;
+    font-weight: 500;
+
+    i {
+      color: #64748b;
+    }
+  }
+
+  .logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    background: #fee2e2;
+    color: #dc2626;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background: #fecaca;
+    }
+  }
 }
 
-.navbar-center a:hover {
-  color: #000;
-}
-
-/* Right: auth buttons */
-.navbar-right {
+.auth-buttons {
   display: flex;
   gap: 1rem;
+
+  .auth-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+
+    &:not(.primary) {
+      color: #3b82f6;
+      
+      &:hover {
+        background: #eff6ff;
+      }
+    }
+
+    &.primary {
+      background: #3b82f6;
+      color: white;
+
+      &:hover {
+        background: #2563eb;
+      }
+    }
+  }
 }
 
-.auth-btn {
-  padding: 0.4rem 0.8rem;
+.mobile-toggle {
+  display: none;
+  padding: 0.5rem;
   border: none;
-  border-radius: 5px;
-  text-decoration: none;
-  background: #2563eb;
-  color: #fff;
-  font-weight: 500;
+  background: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 1.25rem;
 }
 
-.auth-btn:hover {
-  background: #1d4ed8;
+@media (max-width: 768px) {
+  .mobile-toggle {
+    display: block;
+  }
+
+  .navbar-content {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+    gap: 1rem;
+    transform: translateY(-100%);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+
+    &.active {
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .nav-links {
+    flex-direction: column;
+    align-items: stretch;
+
+    a {
+      display: block;
+      padding: 0.75rem 1rem;
+    }
+  }
+
+  .user-menu {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+
+    .create-post-btn {
+      justify-content: center;
+    }
+  }
+
+  .auth-buttons {
+    flex-direction: column;
+
+    .auth-btn {
+      text-align: center;
+    }
+  }
 }

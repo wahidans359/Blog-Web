@@ -17,7 +17,7 @@ export class AuthService {
 
   authState = new BehaviorSubject<AuthState>({
     isAuthenticated: this.tokenService.hasValidAccessToken(),
-    user:undefined
+    user:JSON.parse(localStorage.getItem('userData') || 'null')
   })
 
   authState$ = this.authState.asObservable(); //$ suffix indicates observable
@@ -30,6 +30,7 @@ export class AuthService {
           throw new Error('Invalid login response: No access token provided');
         }
         this.tokenService.setTokens(response);
+        localStorage.setItem('userData', JSON.stringify(response.userData));
         this.authState.next({
           isAuthenticated: true,
           user: response.userData
@@ -81,7 +82,8 @@ export class AuthService {
           isAuthenticated: true,
           user: response.userData
         })
-      })
+      }),
+      catchError(this.handleError)
     );
   }
   logout(userId : string): Observable<void>{
@@ -94,9 +96,10 @@ export class AuthService {
     }).pipe(
       tap(() => {
         this.tokenService.clearTokens();
+        localStorage.removeItem('userData');
         this.authState.next({
           isAuthenticated: false,
-          user: undefined
+          user: null
         })
       })
     );
@@ -106,11 +109,10 @@ export class AuthService {
   }
   checkAuthStatus() : void {
     const isAuth = this.tokenService.hasValidAccessToken();
-    if(!isAuth) {
-      this.authState.next({
-        isAuthenticated: false,
-        user: undefined
-      })
-    }
+    const userData = JSON.parse(localStorage.getItem('userData') || 'null');
+    this.authState.next({
+      isAuthenticated: isAuth,
+      user: isAuth ? userData : null
+    })
   }
 }

@@ -21,11 +21,22 @@ export class PostService {
     private readonly commentRepo: CommentRepository,
   ) {}
   async getAllPosts() {
-    const posts = await this.postRepo.find();
+    const posts = await this.postRepo.find({
+      order: { createdAt: 'DESC' },
+    });
     if (!posts || posts.length === 0) {
       throw new NotFoundException('No posts found');
     }
-    return posts;
+    const postsWithAuthor = await Promise.all(
+      posts.map(async (post) => {
+        const author = await this.userRepo.findById(post.authorId.toString());
+        return {
+          ...post,
+          authorName: author ? author.name : 'Unknown Author',
+        };
+      }),
+    );
+    return postsWithAuthor;
   }
 
   async createPost(createPostDto: CreatePostDto, userId: string) {
@@ -48,7 +59,8 @@ export class PostService {
     if (!savedPost) {
       throw new InternalServerErrorException('Post creation failed');
     }
-    return savedPost;
+    const postWithAuthor = { authorName: author.name, ...savedPost };
+    return postWithAuthor;
   }
   async getPostsByUserId(id: string) {
     const user = await this.userRepo.findById(id);
@@ -68,7 +80,12 @@ export class PostService {
     if (!post) {
       throw new NotFoundException('Post not found');
     }
-    return await this.postRepo.findById(id);
+    const author = await this.userRepo.findById(post.authorId.toString());
+    const postWithAuthor = {
+      authorName: author ? author.name : 'Unknown Author',
+      ...post,
+    };
+    return postWithAuthor;
   }
   async updatePost(id: string, updatePostDto: UpdatePostDto, authorId: string) {
     const post = await this.postRepo.findById(id);
